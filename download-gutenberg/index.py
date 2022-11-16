@@ -22,7 +22,10 @@ import re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-
+input = 'gutenberg_metadata.csv'
+output = './content/gutenberg_data_short_100.csv'
+min = 100
+max = 200
 
 def filter(string):
     stop_words = nltk.corpus.stopwords.words('english')
@@ -78,68 +81,69 @@ def clean_text(text):
     # return filter(''.join(cleaned_text))
     return re.sub(' +', ' ',''.join(cleaned_text))
 
-df_metadata = pd.read_csv('gutenberg_metadata_1.csv')
+df_metadata = pd.read_csv(input)
 
 data = {'Author': None, 'Title': None, 'Link': None, 'ID': None, 'Bookshelf': None, 'Text': None}
 
 for key, row in df_metadata.iterrows():
-    if data['Author'] == None:
-        data['Author'] = [row['Author']]
-    else:
-        data['Author'].append(row['Author'])
-    
-    if data['Title'] == None:
-        data['Title'] = [row['Title']]
-    else:
-        data['Title'].append(row['Title'])
-    
-    if data['Link'] == None:
-        data['Link'] = [row['Link']]
-    else:
-        data['Link'].append(row['Link'])
-    
-    book_id = int(row['Link'].split('/')[-1])
+    if key >= min and key < max:
+        if data['Author'] == None:
+            data['Author'] = [row['Author']]
+        else:
+            data['Author'].append(row['Author'])
+        
+        if data['Title'] == None:
+            data['Title'] = [row['Title']]
+        else:
+            data['Title'].append(row['Title'])
+        
+        if data['Link'] == None:
+            data['Link'] = [row['Link']]
+        else:
+            data['Link'].append(row['Link'])
+        
+        book_id = int(row['Link'].split('/')[-1])
 
-    if data['ID'] == None:
-        data['ID'] = [book_id]
-    else:
-        data['ID'].append(book_id)
-    
-    if data['Bookshelf'] == None:
-        data['Bookshelf'] = [row['Bookshelf']]
-    else:
-        data['Bookshelf'].append(row['Bookshelf'])
+        if data['ID'] == None:
+            data['ID'] = [book_id]
+        else:
+            data['ID'].append(book_id)
+        
+        if data['Bookshelf'] == None:
+            data['Bookshelf'] = [row['Bookshelf']]
+        else:
+            data['Bookshelf'].append(row['Bookshelf'])
 
-    text = np.nan
-    try:
-        text = strip_headers(load_etext(etextno=book_id, 
-                                        mirror='http://www.mirrorservice.org/sites/ftp.ibiblio.org/pub/docs/books/gutenberg/')).strip()
-        text = ' '.join(' '.join(' '.join(' '.join(text.split('\n')).split('\t')).split('\r')).split('\\r\\n'))
-        text = ' '.join(text.split())
-        text = clean_text(str(text))
-    except:
-        try: 
-            page = requests.get(row['Link'])
-            soup = BeautifulSoup(page.content, 'html.parser')
-            text_link = 'http://www.gutenberg.org' + soup.find_all("a", string="Plain Text UTF-8")[0]['href']
-            http_response_object = urlopen(text_link)
-
-            text = strip_headers(str(http_response_object.read()))
+        text = np.nan
+        try:
+            text = strip_headers(load_etext(etextno=book_id, 
+                                            mirror='http://www.mirrorservice.org/sites/ftp.ibiblio.org/pub/docs/books/gutenberg/')).strip()
             text = ' '.join(' '.join(' '.join(' '.join(text.split('\n')).split('\t')).split('\r')).split('\\r\\n'))
             text = ' '.join(text.split())
             text = clean_text(str(text))
         except:
-            print("Couldn't acquire text for " + row['Title'] + ' with ID ' + str(book_id) + '. Link: ' + row['Link'] + ' - ' + text_link)
-            
-    if data['Text'] == None:
-        data['Text'] = [' '.join(text.split(' '))]
-    else:
-        try:
-            data['Text'].append(' '.join(text.split(' ')))
-        except:
-            data['Text'].append(None)
-            print("Couldn't save data for " + row['Title'] + ' with ID ' + str(book_id) + '. Link: ' + row['Link'])
+            try: 
+                page = requests.get(row['Link'])
+                soup = BeautifulSoup(page.content, 'html.parser')
+                text_link = 'http://www.gutenberg.org' + soup.find_all("a", string="Plain Text UTF-8")[0]['href']
+                http_response_object = urlopen(text_link)
+
+                text = strip_headers(str(http_response_object.read()))
+                text = ' '.join(' '.join(' '.join(' '.join(text.split('\n')).split('\t')).split('\r')).split('\\r\\n'))
+                text = ' '.join(text.split())
+                text = clean_text(str(text))
+            except:
+                print("Couldn't acquire text for " + row['Title'] + ' with ID ' + str(book_id) + '. Link: ' + row['Link'] + ' - ' + text_link)
+                
+        if data['Text'] == None:
+            data['Text'] = [' '.join(text.split(' '))]
+        else:
+            try:
+                data['Text'].append(' '.join(text.split(' ')))
+            except:
+                data['Text'].append(None)
+                print("Couldn't save data for " + row['Title'] + ' with ID ' + str(book_id) + '. Link: ' + row['Link'])
 
 df_data = pd.DataFrame(data, columns = ['Title', 'Author', 'Link', 'ID', 'Bookshelf', 'Text'])
 
-df_data.to_csv('./content/gutenberg_data_1.csv', index=False, encoding='utf-8')
+df_data.to_csv(output, index=False, encoding='utf-8')

@@ -5,7 +5,8 @@ os.system('pip install pandas')
 
 import pandas as pd
 
-csv_file = 'gutenberg_data_10.csv'
+csv_file = 'gutenberg_data_short_100.csv'
+output_path = './out/short_100'
 df_metadata = pd.read_csv(csv_file)
 
 def safe_open_w(path):
@@ -15,7 +16,7 @@ def safe_open_w(path):
     return open(path, 'w')
 
 for key, row in df_metadata.iterrows():
-    with safe_open_w('./out/file_' + str(row['ID']) + '.txt') as file:
+    with safe_open_w(output_path + '/file_' + str(row['ID']) + '.txt') as file:
         content = str(row['ID']) + ' ' + row['Text']
         file.write(content)
         file.close()

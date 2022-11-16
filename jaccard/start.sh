@@ -1,21 +1,32 @@
 
-hadoop dfs -rm -r /user/hadoop/input
-hadoop dfs -rm -r /user/hadoop/output_temp
-hadoop dfs -rm -r /user/hadoop/output
+hadoop dfs -rm -r /user/hadoop/input 
 hadoop dfs -copyFromLocal ../format-data/out /user/hadoop/input
 
+
+hadoop dfs -rm -r /user/hadoop/output_temp &
+hadoop dfs -rm -r /user/hadoop/output
+
 hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
--file /home/hadoop/jaccard/mapper1.py \
--mapper /home/hadoop/jaccard/mapper1.py \
--file /home/hadoop/jaccard/reducer1.py \
--reducer /home/hadoop/jaccard/reducer1.py \
+-file ./mapper1.py \
+-mapper ./mapper1.py \
+-file ./reducer1.py \
+-reducer ./reducer1.py \
 -input /user/hadoop/input/* \
 -output /user/hadoop/output_temp
 
 hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
--file /home/hadoop/jaccard/mapper2.py \
--mapper /home/hadoop/jaccard/mapper2.py \
--file /home/hadoop/jaccard/reducer2.py \
--reducer /home/hadoop/jaccard/reducer2.py \
+-file ./mapper2.py \
+-mapper ./mapper2.py \
+-file ./reducer2.py \
+-reducer ./reducer2.py \
 -input /user/hadoop/output_temp/* \
 -output /user/hadoop/output
+
+rm -rf output
+hadoop dfs -copyToLocal /user/hadoop/output
+cat output/part-00000
+cat output/part-00001
+cat output/part-00002
+
+rm -rf output_temp
+hadoop dfs -copyToLocal /user/hadoop/output_temp

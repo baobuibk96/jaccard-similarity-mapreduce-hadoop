@@ -1,0 +1,18 @@
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-file /home/hadoop/jaccard/mapper1.py \
+-mapper /home/hadoop/jaccard/mapper1.py \
+-file /home/hadoop/jaccard/reducer1.py \
+-reducer /home/hadoop/jaccard/reducer1.py \
+-input /user/hadoop/input2/* \
+-output /user/hadoop/output4
+
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar \
+-file /home/hadoop/jaccard/mapper2.py \
+-mapper /home/hadoop/jaccard/mapper2.py \
+-file /home/hadoop/jaccard/reducer2.py \
+-reducer /home/hadoop/jaccard/reducer2.py \
+-input /user/hadoop/output4/* \
+-output /user/hadoop/output5
+
+echo "123 foo foo quux labs foo bar quux" | ./jaccard/mapper1.py
+echo "123 foo foo quux labs foo bar quux \n 345 foo foo quux labs foo bar quux \n 767 foo foo quux labs foo bar quux" | ./jaccard/mapper1.py | sort -k1,1 | ./jaccard/reducer1.py

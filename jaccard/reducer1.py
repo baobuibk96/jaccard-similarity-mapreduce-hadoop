@@ -7,7 +7,7 @@ current_word = None
 current_count = 0
 word = None
 
-total_docs = 3
+total_docs = 10
 group = ''
 
 # input comes from STDIN
@@ -26,8 +26,9 @@ for line in sys.stdin:
     else:
         if current_word:
             # write result to STDOUT
-            if current_count != total_docs and current_count != 1:
-                print('%s\t%s' % (current_word, group))
+            # if current_count != 1:
+            # if current_count != total_docs and current_count != 1:
+            print('%s\t%s' % (current_word, group))
 
         group = data
         current_count = 1
