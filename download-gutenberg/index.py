@@ -22,21 +22,10 @@ import re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-input = 'gutenberg_metadata.csv'
-output = './content/gutenberg_data_short_100.csv'
-min = 100
-max = 200
-
-def filter(string):
-    stop_words = nltk.corpus.stopwords.words('english')
-    word_tokens = word_tokenize(string)
-    filtered_sentence = [w for w in word_tokens if not w.lower() in stop_words]
-    filtered_sentence = ''
-    for w in word_tokens:
-        if w not in stop_words:
-            filtered_sentence = filtered_sentence + ' ' + w
-    filtered_sentence_2 = [re.sub(r"[^a-zA-Z0-9]+", ' ', k) for k in filtered_sentence.split("\n")]
-    return  filtered_sentence_2
+input = 'gutenberg_metadata.csv' # url of 9073 docs
+output = './content/gutenberg_data_10.csv' # ouput file
+min = 0 # from file index
+max = 10 # to file index
 
 # only removes funny tokens for English texts
 def remove_funny_tokens(text):
